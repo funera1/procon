@@ -20,23 +20,33 @@
 #define INF 1e9
 #define rep(i,n)for(long long i=0;(i)<(long long)(n);i++)
 #define REP(i,a,b)for(long long i=(long long)(a);(i)<=(long long)(b);i++)
-#define VEC(type, c, n) std::vector<type> c(n);for(auto& i:c)std::cin>>i;
-#define vec(type,n) vector<type>(n)
-#define vvec(m,n) vector<vector<int>> (int(m),vector<int>(n))
 #define ALL(a)  (a).begin(),(a).end()
+#define chmax(a, b) a = max(a, b)
+#define chmin(a, b) a = min(a, b)
 #define pb push_back
+#define fi first
+#define se second
+#define lb lower_bound
+#define ub upper_bound
+#define len(x) ((int)x.size())
 
 using namespace std;
-using ll = long long;
+//using namespace atcoder;
+using ll = long long int;
+using ld = long double;
+using P = pair<ll, ll>;
 using Graph = vector<vector<int>>;
-using P = pair<int,int>;
+//using mint = modint1000000007;
+
+const ll ZER = 0;
+const ll MOD = 1e9 + 7;
 
 
 //bit全探索
 vector<ll>bitSearch(int bit,int n){
     vector<ll>S;
     rep(i,n)if(bit&(1<<i))S.push_back(i);
-    S.push_back(1e9);
+    // S.push_back(1e9);
     return S;
 }
 
@@ -81,6 +91,13 @@ void sieve(size_t max){
                 IsPrime[i*j] = false;      // 素数ではない
 }
 
+//vectorの重複取り除く
+template <typename T>
+void vectorErase(vector<T> a){
+    sort(ALL(a));
+    a.erase(unique(ALL(a)), a.end());
+}
+
 
 // UnionFind木(サイズ持ち)
 class UnionFind {
@@ -105,17 +122,17 @@ class UnionFind {
             return -par[root(x)];
         }
 
-        void merge(int x, int y){
+        bool merge(int x, int y){
             int rx = root(x);
             int ry = root(y);
-            if(rx == ry)return;
+            if(rx == ry)return false;
 
             if(size(rx) < size(ry))swap(rx, ry);
 
             par[rx] += par[ry];
             par[ry] = rx;
 
-            return;
+            return true;
         }
 
         bool same(int x, int y){
@@ -125,7 +142,6 @@ class UnionFind {
 
 
 //Combination MOD
-const ll MOD = 1e9 + 7;
 vector<ll> fac(SMX);
 vector<ll> fac_inv(SMX);
 
@@ -153,68 +169,10 @@ void preComb(){
     fac_inv[0] = 1;
     for(ll i = 0; i < SMX; i++){
         fac[i + 1] = fac[i] * (i + 1) % MOD;
-        fac_inv[i + 1] = fac_inv[i] * mpow(i + 1, MOD - 2) % MOD;
+        fac_inv[i + 1] = fac_inv[i] * mpow(i + 1, MOD - 2, MOD) % MOD;
     }
 }
 
-
-// modint: mod 計算を int を扱うように扱える構造体
-template<int MOD> struct Fp {
-    long long val;
-    constexpr Fp(long long v = 0) noexcept : val(v % MOD) {
-        if (val < 0) val += MOD;
-    }
-    constexpr int getmod() { return MOD; }
-    constexpr Fp operator - () const noexcept {
-        return val ? MOD - val : 0;
-    }
-    constexpr Fp operator + (const Fp& r) const noexcept { return Fp(*this) += r; }
-    constexpr Fp operator - (const Fp& r) const noexcept { return Fp(*this) -= r; }
-    constexpr Fp operator * (const Fp& r) const noexcept { return Fp(*this) *= r; }
-    constexpr Fp operator / (const Fp& r) const noexcept { return Fp(*this) /= r; }
-    constexpr Fp& operator += (const Fp& r) noexcept {
-        val += r.val;
-        if (val >= MOD) val -= MOD;
-        return *this;
-    }
-    constexpr Fp& operator -= (const Fp& r) noexcept {
-        val -= r.val;
-        if (val < 0) val += MOD;
-        return *this;
-    }
-    constexpr Fp& operator *= (const Fp& r) noexcept {
-        val = val * r.val % MOD;
-        return *this;
-    }
-    constexpr Fp& operator /= (const Fp& r) noexcept {
-        long long a = r.val, b = MOD, u = 1, v = 0;
-        while (b) {
-            long long t = a / b;
-            a -= t * b; swap(a, b);
-            u -= t * v; swap(u, v);
-        }
-        val = val * u % MOD;
-        if (val < 0) val += MOD;
-        return *this;
-    }
-    constexpr bool operator == (const Fp& r) const noexcept {
-        return this->val == r.val;
-    }
-    constexpr bool operator != (const Fp& r) const noexcept {
-        return this->val != r.val;
-    }
-    friend constexpr ostream& operator << (ostream &os, const Fp<MOD>& x) noexcept {
-        return os << x.val;
-    }
-    friend constexpr Fp<MOD> modpow(const Fp<MOD> &a, long long n) noexcept {
-        if (n == 0) return 1;
-        auto t = modpow(a, n / 2);
-        t = t * t;
-        if (n & 1) t = t * a;
-        return t;
-    }
-};
-using mint = Fp<1000000007>;
 
 // 多倍長テンプレ
 /* ---------------------- ここから ---------------------- */
@@ -227,86 +185,6 @@ using Bint = mp::cpp_int;
 using Real = mp::number<mp::cpp_dec_float<1024>>;
 /* ---------------------- ここまで ---------------------- */
 
-
-//素数判定
-bool isPrime(int x){
-    int i;
-    if(x < 2)return 0;
-    else if(x == 2) return 1;
-    if(x%2 == 0) return 0;
-    for(i = 3; i*i <= x; i += 2) if(x%i == 0) return 0;
-    return 1;
-}
-
-//桁和
-int digsum(int n) {
-    int res = 0;
-    while(n > 0) {
-        res += n%10;
-        n /= 10;
-    }
-    return res;
-}
-
-
-//約数全列挙
-vector<int> enum_div(int n){
-    vector<int> ret;
-    for(int i = 1 ; i*i <= n ; ++i){
-        if(n%i == 0){
-            ret.push_back(i);
-            if(i != 1 && i*i != n){
-                ret.push_back(n/i);
-            }
-        }
-    }
-    return ret;
-}
-
-//Segment木
-/*RMQ : [0, n-1]について、区間ごとの最小値を管理する構造体
-  update(i, x) : i番目の要素をxに更新.O(log(n))
-  query(a, b) : [a, b)での最小の要素を取得.O(log(n))
-*/
-
-template<typename T>
-struct RMQ{
-    const T INF = numeric_limits<T>::max();
-    int n;            //葉の数
-    vector<T> dat;    //完全二分木の配列
-    RMQ(int n_) : n(), dat(n_ * 4, INF){    //葉の数は2^xの形
-        int x = 1;
-        while(n_ > x){
-            x *= 2;
-        }
-        n = x;
-    }
-
-    void update(int i, T x){
-        i += n - 1;
-        dat[i] = x;
-        while(i > 0){
-            i = (i - 1) / 2;    //parent
-            dat[i] = min(dat[i + 2 + 1], dat[i * 2 + 2]);
-        }
-    }
-
-    //the minimum elsemnt of[a, b)
-    T query(int a, int b){return qurey_sub(a, b, 0, 0, n);}
-    T query_sub(int a, int b, int k, int l, int r){
-        if(r <= a || b <= l){
-            return INF;
-        }
-        else if(a <= l && r <= b){
-            return dat[k];
-        }
-        else {
-            T vl = query_sub(a, b, k * 2 + 1, l, (l + r) / 2);
-            T vr = query_sub(a, b, k * 2 + 2, (l + r) / 2, r);
-            return min(vl, vr);
-        }
-    }
-};
 
 //桁dp
 ll dp[32][2][4];
@@ -364,6 +242,12 @@ struct BIT{
             return x + 1;
         }
     }
+
+    T num(int i){
+        T res = sum(i);
+        if(i != 1)res -= sum(i - 1);
+        return res;
+    }
 };
 
 
@@ -412,8 +296,8 @@ vector<ll>  dijkstra(int s, vector<vector<edge>> G, int V){
         pq.pop();
         int v = p.second;
         if(d[v] < p.first)continue;
-        int sz = G[v].size();
-        for(int i = 0; i < sz; i++){
+        int siz = G[v].size();
+        for(int i = 0; i < siz; i++){
             edge e = G[v][i];
             if(d[e.to] > d[v]+e.cost){
                 d[e.to] = d[v] + e.cost;
@@ -422,6 +306,30 @@ vector<ll>  dijkstra(int s, vector<vector<edge>> G, int V){
         }
     }
     return d;
+}
+
+//bellman-ford
+struct edge{
+    int from, to;
+    ll cost;
+};
+
+//始点から到達可能でかつ終点へ到達可能な不閉路が検出されたらfalse、そうでないならtrue
+bool bellman_ford(int n, const vector<edge> &es, vector<ll> &cost, int s, int g){
+    const ll inf = 1e18;
+    cost.assign(v, inf);
+    cost[s] = 0;
+
+    rep(i, n * 2){
+        for(auto &e : es){
+            if(cost[e.from] < inf && cost[e.from] + e.cost < cost[e.to]){
+                if(i >= n - 1 && e.to == g)return false;
+                else if(i >= n - 1)cost[e.to] = -inf;
+                else cost[e.to] = cost[e.from] + e.cost;;
+            }
+        }
+    }
+    return true;
 }
 
 //頂点u, vを含む最小木
@@ -521,14 +429,85 @@ struct SegTree{
         }
     }
 
-    X query(int a, int b, int k = 0, int l = 0, int r = -1){
+    X get(int a, int b, int k = 0, int l = 0, int r = -1){
         if(r < 0)r = n;
         if(r <= a || b <= l)return ex;
         if(a <= l && r <= b)return dat[k];
 
-        X vl = query(a, b, k * 2 + 1, l, (l + r) / 2);
-        X vr = query(a, b, k * 2 + 2, (l + r) / 2, r);
+        X vl = get(a, b, k * 2 + 1, l, (l + r) / 2);
+        X vr = get(a, b, k * 2 + 2, (l + r) / 2, r);
         return fx(vl, vr);
+    }
+
+    X num(int i){
+        return dat[i + n - 1];
+    }
+};
+
+
+/* SegTreeLazy<X,M>(n,fx,fa,fm,ex,em): モノイド(集合X, 二項演算fx,fa,fm, 単位元ex,em)についてサイズnで構築
+    set(int i, X x), build(): i番目の要素をxにセット。まとめてセグ木を構築する。O(n)
+    update(i,x): i 番目の要素を x に更新。O(log(n))
+    query(a,b):  [a,b) 全てにfxを作用させた値を取得。O(log(n))
+*/
+template <typename X, typename M>
+struct SegTreeLazy {
+    using FX = function<X(X, X)>;
+    using FA = function<X(X, M)>;
+    using FM = function<M(M, M)>;
+    int n;
+    FX fx;
+    FA fa;
+    FM fm;
+    const X ex;
+    const M em;
+    vector<X> dat;
+    vector<M> lazy;
+    SegTreeLazy(int n_, FX fx_, FA fa_, FM fm_, X ex_, M em_)
+        : n(), fx(fx_), fa(fa_), fm(fm_), ex(ex_), em(em_), dat(n_ * 4, ex), lazy(n_ * 4, em) {
+        int x = 1;
+        while (n_ > x) x *= 2;
+        n = x;
+    }
+    void set(int i, X x) { dat[i + n - 1] = x; }
+    void build() {
+        for (int k = n - 2; k >= 0; k--) dat[k] = fx(dat[2 * k + 1], dat[2 * k + 2]);
+    }
+    /* lazy eval */
+    void eval(int k) {
+        if (lazy[k] == em) return;  // 更新するものが無ければ終了
+        if (k < n - 1) {            // 葉でなければ子に伝搬
+            lazy[k * 2 + 1] = fm(lazy[k * 2 + 1], lazy[k]);
+            lazy[k * 2 + 2] = fm(lazy[k * 2 + 2], lazy[k]);;
+        }
+        // 自身を更新
+        dat[k] = fa(dat[k], lazy[k]);
+        lazy[k] = em;
+    }
+    void update(int a, int b, M x, int k = 0, int l = 0, int r = -1) {
+        if(r == -1)r = n;
+        eval(k);
+        if (a <= l && r <= b) {  // 完全に内側の時
+            lazy[k] = fm(lazy[k], x);
+            eval(k);
+        } else if (a < r && l < b) {                     // 一部区間が被る時
+            update(a, b, x, k * 2 + 1, l, (l + r) / 2);  // 左の子
+            update(a, b, x, k * 2 + 2, (l + r) / 2, r);  // 右の子
+            dat[k] = fx(dat[k * 2 + 1], dat[k * 2 + 2]);
+        }
+    }
+    X get(int a, int b, int k = 0, int l = 0, int r = -1) {
+        if(r == -1)r = n;
+        eval(k);
+        if (r <= a || b <= l) {  // 完全に外側の時
+            return ex;
+        } else if (a <= l && r <= b) {  // 完全に内側の時
+            return dat[k];
+        } else {  // 一部区間が被る時
+            X vl = get(a, b, k * 2 + 1, l, (l + r) / 2);
+            X vr = get(a, b, k * 2 + 2, (l + r) / 2, r);
+            return fx(vl, vr);
+        }
     }
 };
 
@@ -541,29 +520,113 @@ double round_n(double number, double n)
     return number;
 }
 
-//prim法
-struct edge{
-    int to;
-    ll cost;
-};
 
-ll prim(vector<vector<ll>> Graph, int V){
-    ll res = 0;
-    vector<bool> used(V, false);
-    priority_queue<P, vector<P>, greater<P>> pq;
-    pq.push(0, 0);
-    while(!pq.empty()){
-        P p = pq.top();
-        pq.pop();
-        if(used[p.second])continue;
-        used[p.second] = true;
-        res += p.first;
-        for(auto e : Graph[p.second]){
-            if(!used[e.to])pq.push(P(e.cost, e.to));
+/* Prim : プリム法で minimum spanning tree を求める構造体
+    入力: 隣接行列でのグラフ G
+    最小全域木の重みの総和: sum
+    計算量: O(|V|^2)
+*/
+template <typename T>
+struct Prim {
+    T sum;              // MSTの重みの総和
+    int n;                // 頂点数
+    vector<T> mincost;  // 既に確定した頂点からの最小コスト（確定済みから行けない時は INF）
+    vector<bool> used;    // 既に確定したかどうか
+    Prim(vector<vector<T>> const& Graph) {
+        init(Graph);
+    }
+    void init(vector<vector<T>> const& Graph) {
+        n = (int)Graph.size();
+        mincost.assign(n, INF);
+        used.assign(n, false);
+        sum = 0;
+        mincost[0] = 0;  // 始め頂点0からスタートさせる
+        while (true) {
+            int v = -1;
+            for (int u = 0; u < n; u++) {  // コストが最小で行ける頂点 v を探す
+                if (!used[u] && (v == -1 || mincost[u] < mincost[v])) v = u;
+            }
+            if (v == -1) break;  // MST ができたので終了
+            used[v] = true;
+            sum += mincost[v];
+            for (int u = 0; u < n; u++) {  // 確定した頂点から行ける頂点について、最小コストを更新
+                if (Graph[v][u] != -1) mincost[u] = min(mincost[u], Graph[v][u]);
+            }
         }
     }
-    return res;
-}
+};
+
+
+
+
+//Kruskal法------------------------------------------------------------------------------
+/* UnionFind：素集合系管理の構造体(union by rank)
+    isSame(x, y): x と y が同じ集合にいるか。 計算量はならし O(α(n))
+    unite(x, y): x と y を同じ集合にする。計算量はならし O(α(n))
+*/
+struct UnionFind {  // The range of node number is u 0 v n-1
+    vector<int> rank, parents;
+    UnionFind() {}
+    UnionFind(int n) {  // make n trees.
+        rank.resize(n, 0);
+        parents.resize(n, 0);
+        for (int i = 0; i < n; i++) {
+            makeTree(i);
+        }
+    }
+    void makeTree(int x) {
+        parents[x] = x;  // the parent of x is x
+        rank[x] = 0;
+    }
+    bool isSame(int x, int y) { return findRoot(x) == findRoot(y); }
+    void unite(int x, int y) {
+        x = findRoot(x);
+        y = findRoot(y);
+        if (rank[x] > rank[y]) {
+            parents[y] = x;
+        } else {
+            parents[x] = y;
+            if (rank[x] == rank[y]) {
+                rank[y]++;
+            }
+        }
+    }
+    int findRoot(int x) {
+        if (x != parents[x]) parents[x] = findRoot(parents[x]);
+        return parents[x];
+    }
+};
+// 辺の定義
+struct Edge {
+    long long u;
+    long long v;
+    long long cost;
+};
+bool comp_e(const Edge &e1, const Edge &e2) { return e1.cost < e2.cost; } // 辺を直接比較するための関数
+/* Kruskal :クラスカル法で minimum spanning tree を求める構造体
+    入力: 辺のvector, 頂点数V
+    最小全域木の重みの総和: sum
+    計算量: O(|E|log|V|)
+*/
+struct Kruskal {
+    UnionFind uft;
+    long long sum;  // 最小全域木の重みの総和
+    vector<Edge> edges;
+    int V;
+    Kruskal(const vector<Edge> &edges_, int V_) : edges(edges_), V(V_) { init(); }
+    void init() {
+        sort(edges.begin(), edges.end(), comp_e); // 辺の重みでソート
+        uft = UnionFind(V);
+        sum = 0;
+        for (auto e : edges) {
+            if (!uft.isSame(e.u, e.v)) { // 閉路にならなければ加える
+                uft.unite(e.u, e.v);
+                sum += e.cost;
+            }
+        }
+    }
+};
+//------------------------------------------------------------------------------
 
 // ローリングハッシュ
 //LCPを二分探索で求める機能付き
@@ -609,3 +672,182 @@ struct RollingHash {
     }
 };
 
+//トポロジカルソート
+//topo_sort
+vector<int> topo_sort(const Graph &G){
+    vector<int> res;
+    int n = (int)G.size();
+    vector<int> ind(n);  //ind[i]: 頂点iの入次数
+    //次数を数えておく
+    rep(i, n){
+        for(auto e : G[i]){
+            ind[e]++;
+        }
+    }
+    queue<int> que;
+    rep(i, n){
+        if(ind[i] == 0)que.push(i);
+    }
+    //bfs
+    while(!que.empty()){
+        int v = que.front();
+        res.pb(v);
+        que.pop();
+        for(auto nv : G[v]){
+            ind[nv]--;
+            if(ind[nv] == 0){
+                que.push(nv);
+            }
+        }
+    }
+    return res;
+}
+
+//LCA
+template <typename T>
+struct LCA{
+    vector<vector<int>> par;  //par[k][u]:= uの2^k先の点
+    vector<T> dist; //rootからの距離
+    LCA(const Graph &G, int root = 0){
+        init(G, root);
+    }
+
+    //初期化
+    void init (const Graph &G, int root = 0){
+        int V = G.size();
+        int K = 1;
+        while((1 << K) < V)K++;
+        parent.assign(K, vector<int>(V, -1));
+        dist.assign(V, -1);
+        dfs(G, root, -1, 0);
+        rep(k, K - 1){
+            rep(v, V){
+                if(par[k][v] < 0){
+                    par[k + 1][v] = -1;
+                }
+                else{
+                    par[k + 1][v] = par[k][par[k][v]];
+                }
+            }
+        }
+    }
+
+    //根からの距離と1つ先の頂点を求める
+    void dfs(const Graph &G, int v, int p, int d){
+        par[0][v] = p;
+        dist[v] = d;
+        for(auto nv : G[v]){
+            if(nv != p)dfs(G, nv, v, d + 1);
+        }
+    }
+
+    //(u, v)のLCAを求める
+    int query(int u, int v){
+        if(dist[u] < dist[v])swqp(u, v);
+        int K = par.size();
+        //LCAまでの距離を同じにする
+        rep(k, K){
+            if((dist[u] - dist[v]) >> k & 1)u = par[k][u];
+        }
+
+        //二分探索
+        if(u == v)return u;
+        for(int k = K - 1; k >= 0; k--){
+            if(par[k][u] != par[k][v]){
+                u = par[k][u];
+                v = par[k][v];
+            }
+        }
+        return par[0][u];
+    }
+
+    //2頂点間の距離:O(log N)
+    T get_dist(int u, int v) { 
+        return dist[u] + dist[v] - 2 * dist[query(u, v)];
+    }
+
+    //2頂点上に点aがあるか
+    bool is_on_path(int u, int v, int a) { 
+        return get_dist(u, a) + get_dist(a, v) == get_dist(u, v);
+    }
+};
+
+//最小包含円
+template <class iter>
+std::pair<P, ld> min_ball(iter left, iter right, int seed = 1333) {
+    const int n = right - left;
+
+    assert(n >= 1);
+    if (n == 1) {
+        return {*left, ld(0)};
+    }
+
+    std::mt19937 mt(seed);
+    std::shuffle(left, right, mt);
+    // std::random_shuffle(left, right); // simple but deprecated
+
+    iter ps = left;
+    using circle = std::pair<P, ld>;
+
+    auto make_circle_3 = [](const P &a, const P &b, const P &c) -> circle {
+        ld A = std::norm(b - c), B = std::norm(c - a), C = std::norm(a - b),
+           S = cross(b - a, c - a);
+        P p = (A * (B + C - A) * a + B * (C + A - B) * b + C * (A + B - C) * c) / (4 * S * S);
+        ld r2 = std::norm(p - a);
+        return {p, r2};
+    };
+
+    auto make_circle_2 = [](const P &a, const P &b) -> circle {
+        P c = (a + b) / (ld)2;
+        ld r2 = std::norm(a - c);
+        return {c, r2};
+    };
+
+    auto in_circle = [](const P &a, const circle &c) -> bool {
+        return std::norm(a - c.first) <= c.second + eps;
+    };
+
+    circle c = make_circle_2(ps[0], ps[1]);
+
+    // MiniDisc
+    for (int i = 2; i < n; ++i) {
+        if (!in_circle(ps[i], c)) {
+            // MiniDiscWithPoint
+            c = make_circle_2(ps[0], ps[i]);
+            for (int j = 1; j < i; ++j) {
+                if (!in_circle(ps[j], c)) {
+                    // MiniDiscWith2Points
+                    c = make_circle_2(ps[i], ps[j]);
+                    for (int k = 0; k < j; ++k) {
+                        if (!in_circle(ps[k], c)) {
+                            c = make_circle_3(ps[i], ps[j], ps[k]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return c;
+}
+
+
+//拡張ユークリッド
+//extgcd(a, b, x, y): a*x+b*y = gcd(a, b)を満たすx, yが格納される。return gcd(a, b)
+ll extgcd(ll a, ll b, ll &x, ll &y){
+    ll g = a;
+    x = 1;
+    y = 0;
+    if(b != 0){
+        g = extgcd(b, a % b, y, x);
+        y -= (a / b) * x;
+    }
+    return g;
+}
+
+//逆元
+//mod_inverse(a, b): a^-1 (mod m)
+ll mod_inverse(ll a, ll m){
+    ll x, y;
+    extgcd(a, m, x, y);
+    return (m + x % m) % m;
+}
