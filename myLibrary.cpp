@@ -230,14 +230,16 @@ struct BIT{
     }
 
     //sum(a_i) >= w となるような最小のxを求める
-    int lower_bound(T w){
-        if(w <= 0)return 0;
-        else {
-            int x = 0, r = 1;
-            while(r < n)r = r << 1;
-            for(int len = r; len > 0; len = len >> 1){
-                w -= bit[x + len];
-                x += len;
+    int lower_bound(T w) { // a_1 + a_2 + ... + a_x >= w となるような最小の x を求める(ただし a_i >= 0)
+    if (w <= 0) return 0;
+    else {
+        int x = 0, r = 1;
+        while (r < n) r = r << 1;
+            for (int len = r; len > 0; len = len >> 1) { // 長さlenは1段下るごとに半分に
+                if (x + len < n && bit[x + len] < w) { // 採用するとき
+                    w -= bit[x + len];
+                    x += len;
+                }
             }
             return x + 1;
         }
@@ -249,6 +251,7 @@ struct BIT{
         return res;
     }
 };
+
 
 
 //区間和対応BIT
@@ -560,7 +563,7 @@ struct Prim {
 
 
 //Kruskal法------------------------------------------------------------------------------
-/* UnionFind：素集合系管理の構造体(union by rank)
+/* 
     isSame(x, y): x と y が同じ集合にいるか。 計算量はならし O(α(n))
     unite(x, y): x と y を同じ集合にする。計算量はならし O(α(n))
 */
