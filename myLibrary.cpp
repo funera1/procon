@@ -18,28 +18,23 @@
 #include<cstdint>
 
 #define INF 1e9
-#define rep(i,n)for(long long i=0;(i)<(long long)(n);i++)
-#define REP(i,a,b)for(long long i=(long long)(a);(i)<=(long long)(b);i++)
+#define LINF (1LL << 63 - 1)
+#define rep(i,n)for(int i=0;(i)<(int)(n);i++)
+#define REP(i,a,b)for(int i=(int)(a);(i)<=(int)(b);i++)
 #define ALL(a)  (a).begin(),(a).end()
-#define chmax(a, b) a = max(a, b)
-#define chmin(a, b) a = min(a, b)
 #define pb push_back
 #define fi first
 #define se second
-#define lb lower_bound
-#define ub upper_bound
-#define len(x) ((int)x.size())
-
+#define sz(x) ((int)x.size())
+ 
 using namespace std;
 //using namespace atcoder;
-using ll = long long int;
 using ld = long double;
+using ll = long long;
 using P = pair<ll, ll>;
-using Graph = vector<vector<int>>;
-//using mint = modint1000000007;
-
-const ll ZER = 0;
-const ll MOD = 1e9 + 7;
+ 
+template<typename T> bool chmin(T& a, const T& b) { if(a > b){ a = b; return 1;} return 0; }
+template<typename T> bool chmax(T& a, const T& b) { if(a < b){ a = b; return 1;} return 0; }
 
 
 //bit全探索
