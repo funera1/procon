@@ -16,25 +16,22 @@
 #include <cassert>
 #include <cmath>
 #include<cstdint>
-
 #define INF 1e9
-#define LINF (1LL << 63 - 1)
-#define rep(i,n)for(int i=0;(i)<(int)(n);i++)
-#define REP(i,a,b)for(int i=(int)(a);(i)<=(int)(b);i++)
+#define rep(i,n)for(long long i=0;(i)<(long long)(n);i++)
+#define REP(i,a,b)for(long long i=(long long)(a);(i)<=(long long)(b);i++)
 #define ALL(a)  (a).begin(),(a).end()
 #define pb push_back
 #define fi first
 #define se second
 #define sz(x) ((int)x.size())
- 
+
 using namespace std;
-//using namespace atcoder;
+using ll = long long int;
 using ld = long double;
-using ll = long long;
 using P = pair<ll, ll>;
- 
-template<typename T> bool chmin(T& a, const T& b) { if(a > b){ a = b; return 1;} return 0; }
-template<typename T> bool chmax(T& a, const T& b) { if(a < b){ a = b; return 1;} return 0; }
+
+const ll ZER = 0;
+const ll MOD = 1e9 + 7;
 
 
 //bit全探索
@@ -239,6 +236,7 @@ struct BIT{
             return x + 1;
         }
     }
+    
 
     T num(int i){
         T res = sum(i);
@@ -282,8 +280,8 @@ struct segBIT {
 
 
 //dijkstra法
-struct edge{int to, cost;};
-vector<ll>  dijkstra(int s, vector<vector<edge>> G, int V){
+//P(to, cost)
+vector<ll>  dijkstra(int s, vector<vector<P>> G, int V){
     vector<ll> d(V, INF);
     priority_queue<P, vector<P>, greater<P>>pq;
     d[s] = 0;
@@ -296,10 +294,10 @@ vector<ll>  dijkstra(int s, vector<vector<edge>> G, int V){
         if(d[v] < p.first)continue;
         int siz = G[v].size();
         for(int i = 0; i < siz; i++){
-            edge e = G[v][i];
-            if(d[e.to] > d[v]+e.cost){
-                d[e.to] = d[v] + e.cost;
-                pq.push(P(d[e.to], e.to));
+            P e = G[v][i];
+            if(d[e.fi] > d[v] + e.se){
+                d[e.fi] = d[v] + e.se;
+                pq.push(P(d[e.fi], e.fi));
             }
         }
     }
@@ -519,7 +517,7 @@ double round_n(double number, double n)
 }
 
 
-/* Prim : プリム法で minimum spanning tree を求める構造体
+/* Prim(隣接行列) : プリム法で minimum spanning tree を求める構造体
     入力: 隣接行列でのグラフ G
     最小全域木の重みの総和: sum
     計算量: O(|V|^2)
@@ -554,6 +552,28 @@ struct Prim {
     }
 };
 
+/* prim(隣接グラフ)
+   入力: 隣接グラフ G
+   計算量 O(|E| log |V|)
+   引数: prim(グラフ, 頂点数)
+*/
+ll prim(vector<P> G, int V){
+    vector<bool> seen(n, false);
+    priority_queue<P, vector<P>, greater<P>> pq;
+    pq.push(P(0, 0));
+    ll ret = 0;
+    while(!pq.empty()){
+        auto [cost, v] = pq.top;
+        pq.pop(;
+        if(seen[v]))continue;
+        seen[v] = true;
+        ret += cost;
+        for(auto nv : G[v]){
+            pq.push(nv);
+        }
+    }
+    return ret;
+}
 
 
 
@@ -849,3 +869,61 @@ ll mod_inverse(ll a, ll m){
     extgcd(a, m, x, y);
     return (m + x % m) % m;
 }
+
+
+//scc
+//強連結成分分解
+struct scc_graph {
+    int V;                          //頂点数
+    vector<vector<int>> G;          //グラフの隣接リスト
+    vector<vector<int>> rG;         //逆辺を張ったグラフ
+    vector<int> vs;                 //帰りがけの並び
+    vector<bool> used;              //すでに調べたか
+    vector<int> cmp;                //属する強連結成分のトポロジカル順序
+
+    scc_graph(int V_) : V(), G(V_ + 1), rG(V_ + 1), used(V_ + 1), cmp(V_ + 1) {}
+
+
+    //辺を追加
+    void add_edge(int from, int to){
+        assert(0 <= from && from < V);
+        assert(0 <= to && to < V);
+        G[from].push_back(to);
+        rG[to].push_back(from);
+    }
+    
+    //1回目のdfs
+    void dfs(int v){
+        used[v] = true;
+        assert(0 <= v && v < V);
+        for (int i = 0; i < G[v].size(); i++) {
+            if(!used[G[v][i]]) dfs(G[v][i]);
+        }
+        vs.push_back(v);
+    }
+
+    //2回目のdfs
+    void rdfs(int v, int k){
+        assert(0 <= v && v < V);
+        used[v] = true;
+        cmp[v] = k;
+        for(int i = 0; i < rG[v].size(); i++){
+            if(!used[rG[v][i]]) rdfs(rG[v][i], k);
+        }
+    }
+
+    //scc: O(V + E)
+    int scc(){
+        used = vector<bool> (V, false);
+        vs.clear();
+        for(int v = 0; v < V; v++){
+            if(!used[v]) dfs(v);
+        }
+        used = vector<bool> (V, false);
+        int k = 0;
+        for(int i = vs.size() - 1; i >= 0; i--){
+            if(!used[vs[i]]) rdfs(vs[i], k++);
+        }
+        return k;
+    }
+};
